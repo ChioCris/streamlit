@@ -1,42 +1,47 @@
 import streamlit as st
 import pulp
 
-# Título de la aplicación
-st.title("Problema de Optimización Lineal")
+def main():
+    st.title("Planos de Corte de Gomory para Programación Entera")
+    st.write("""
+    ### Problema de Optimización
+    Minimizar: C(x, y) = x - y  
+    Sujeto a:  
+    1. 3x + 4y ≤ 6  
+    2. x - y ≤ 1  
+    con x, y números enteros no negativos.
+    """)
 
-# Descripción del problema
-st.write("""
-Este es un ejemplo de un problema de optimización lineal que maximiza una función objetivo
-sujeta a varias restricciones.
-""")
+    prob = pulp.LpProblem("Minimize_C", pulp.LpMinimize)
 
-# Definir el problema
-prob = pulp.LpProblem("Maximize_P", pulp.LpMaximize)
+    # Definir las variables (aquí inicialmente no se imponen restricciones de enteros)
+    x = pulp.LpVariable('x', lowBound=0)
+    y = pulp.LpVariable('y', lowBound=0)
 
-# Definir las variables
-x1 = pulp.LpVariable('x1', lowBound=0, cat='Integer')
-x2 = pulp.LpVariable('x2', lowBound=0, cat='Integer')
-x3 = pulp.LpVariable('x3', lowBound=0, cat='Integer')
+    # Función objetivo
+    prob += x - y, "Objective"
 
-# Función objetivo
-prob += 4 * x1 + 3 * x2 + 3 * x3, "Objective"
+    # Restricciones
+    prob += 3 * x + 4 * y <= 6, "Constraint 1"
+    prob += x - y <= 1, "Constraint 2"
 
-# Restricciones
-prob += 4 * x1 + 2 * x2 + x3 <= 10, "Constraint 1"
-prob += 3 * x1 + 4 * x2 + 2 * x3 <= 14, "Constraint 2"
-prob += 2 * x1 + x2 + 3 * x3 <= 7, "Constraint 3"
+    # Resolver el problema de programación lineal relajada
+    prob.solve()
 
-# Resolver el problema
-prob.solve()
+    # Mostrar la solución de la relajación continua
+    st.write("**Solución Relajada (No entera):**")
+    st.write(f"x = {x.varValue}")
+    st.write(f"y = {y.varValue}")
+    st.write("Valor de la función objetivo =", pulp.value(prob.objective))
 
-# Mostrar el estado de la solución
-st.write("**Estado:**", pulp.LpStatus[prob.status])
+    # Aquí es donde deberías implementar los cortes de Gomory de manera iterativa.
+    # Esta sección es solo una base; implementar planos de corte es más complejo y
+    # requiere definir las tablas simplex y trabajar con fracciones.
 
-# Mostrar los valores óptimos de las variables
-st.write("**Solución Óptima:**")
-st.write(f"x1 = {x1.varValue}")
-st.write(f"x2 = {x2.varValue}")
-st.write(f"x3 = {x3.varValue}")
+    # Advertencia sobre la falta de implementación completa
+    st.write("**Nota:** Los cortes de Gomory aún no están implementados en este ejemplo.")
+    st.write("Para una solución completa, se necesita desarrollar la tabla Simplex y aplicar iterativamente los planos de corte.")
 
-# Mostrar el valor óptimo de la función objetivo
-st.write("**Valor de la Función Objetivo:**", pulp.value(prob.objective))
+# Ejecutar la aplicación principal
+if __name__ == "__main__":
+    main()
